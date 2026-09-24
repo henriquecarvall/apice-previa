@@ -157,6 +157,8 @@
 
   .screen { display: none; }
   .screen.on { display: block; }
+  .modal { position: fixed; inset: 0; background: rgba(23,27,34,.55); display: grid; place-items: center; padding: 16px; z-index: 30; }
+  .mbox { width: 100%; max-width: 480px; }
   .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13px; box-shadow: 0 10px 30px -10px rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20; max-width: calc(100vw - 32px); text-align: center; }
   .toast.on { opacity: 1; }
 
@@ -196,6 +198,7 @@
     <symbol id="i-set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></symbol>
     <symbol id="i-share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 12v7h16v-7M12 3v12M8 7l4-4 4 4"/></symbol>
+    <symbol id="i-agency" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 10h.01M15 10h.01M9 14h.01M15 14h.01"/></symbol>
     <symbol id="i-out" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></symbol>
   </defs>
 </svg>
@@ -206,11 +209,19 @@
   <div class="right"><button type="button" data-go="login">Ver tela de login</button></div>
 </div>
 <div class="toast" id="toast" role="status"></div>
+<div class="modal" id="modal" hidden>
+  <div class="mbox card">
+    <div class="in stack" id="modal-body"></div>
+  </div>
+</div>
+
 
 <div class="app" id="app">
   <aside class="sidebar" aria-label="Menu">
     <div class="logo"><svg><use href="#mark-white"/></svg> Ápice</div>
-    <div class="acct"><b>Aurora Modas</b><span>Pré-pago · por entregues</span><br><span class="bal">1.240 marketing · 3.980 utilidade</span></div>
+    <div class="acct"><b id="acct-name">Aurora Modas</b><span id="acct-pkg">Pré-pago · por entregues</span><br><span class="bal" id="acct-bal">1.240 marketing · 3.980 utilidade</span></div>
+    <div class="grp">Agência</div>
+    <button class="nav" data-go="agencia"><svg><use href="#i-agency"/></svg> Console da agência</button>
     <div class="grp">Resumo</div>
     <button class="nav" data-go="painel"><svg><use href="#i-chart"/></svg> Relatórios</button>
     <button class="nav" data-go="novidades"><svg><use href="#i-news"/></svg> Novidades</button>
@@ -230,6 +241,81 @@
   </aside>
 
   <main class="main">
+
+
+  <!-- AGÊNCIA -->
+  <section class="screen" id="s-agencia">
+    <div class="head">
+      <div><span class="pill b" style="margin-bottom:6px">Agência Aurora · white-label</span><h1>Console da agência</h1><p>Seus clientes, o saldo de cada um e o que você paga à Ápice. Entre no painel de qualquer cliente com um clique.</p></div>
+      <div class="row"><button class="btn o" data-go="agencia-marca">Marca da agência</button><button class="btn p" data-modal="novo-cliente">Cadastrar cliente</button></div>
+    </div>
+    <div class="stack">
+      <div class="grid g4">
+        <div class="card kpi"><div class="in"><div class="lbl">Clientes ativos</div><div class="val num">6</div><div class="hint">1 bloqueado por fatura</div></div></div>
+        <div class="card kpi"><div class="in"><div class="lbl">Mensagens entregues no mês</div><div class="val num">18.420</div><div class="var">▲ 14% vs. agosto</div></div></div>
+        <div class="card kpi"><div class="in"><div class="lbl">Sua margem no mês</div><div class="val num">R$ 2.394</div><div class="hint">Varejo R$ 0,30 − atacado R$ 0,17</div></div></div>
+        <div class="card kpi"><div class="in"><div class="lbl">A pagar à Ápice</div><div class="val num">R$ 1.180</div><div class="hint">Fatura vence hoje · Pix</div></div></div>
+      </div>
+      <div class="card">
+        <div class="in row sp" style="padding-bottom:8px"><h3 style="margin:0">Clientes</h3><div class="chips"><span class="chip on">Todos</span><span class="chip">Pré-pago</span><span class="chip">Pós-pago</span><span class="chip">Bloqueados</span></div></div>
+        <div class="tw"><table class="tbl">
+          <thead><tr><th>Cliente</th><th>Pacote</th><th>Saldo</th><th>Preço (mkt · util)</th><th>Situação</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><b>Aurora Modas</b><div class="sm muted">moda · 3.412 clientes</div></td><td>Pré-pago · entregues</td><td class="num">1.240 mkt · 3.980 util</td><td class="num">R$ 0,30 · R$ 0,15</td><td><span class="pill ok">Em dia</span></td><td><div class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn o sm" data-modal="recarga">Recarregar</button><button class="btn p sm" data-client="Aurora Modas|Pré-pago · por entregues|1.240 marketing · 3.980 utilidade">Acessar painel</button></div></td></tr>
+            <tr><td><b>Pet Amigo</b><div class="sm muted">pet · 1.208 clientes</div></td><td>Pré-pago · disparadas</td><td class="num">860 mkt · 2.100 util</td><td class="num">R$ 0,30 · R$ 0,15</td><td><span class="pill ok">Em dia</span></td><td><div class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn o sm" data-modal="recarga">Recarregar</button><button class="btn p sm" data-client="Pet Amigo|Pré-pago · por disparadas|860 marketing · 2.100 utilidade">Acessar painel</button></div></td></tr>
+            <tr><td><b>Barbearia do Zé</b><div class="sm muted">barbearia · 640 clientes</div></td><td>Pós-pago · entregues</td><td class="num">—</td><td class="num">R$ 0,35 · R$ 0,18</td><td><span class="pill wn">Fatura em aberto · R$ 214</span></td><td><div class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn o sm">Ver fatura</button><button class="btn p sm" data-client="Barbearia do Zé|Pós-pago · por entregues|Fatura em aberto: R$ 214">Acessar painel</button></div></td></tr>
+            <tr><td><b>Clínica Bem Viver</b><div class="sm muted">clínica · 2.050 clientes</div></td><td>Pré-pago · entregues</td><td class="num">120 mkt · 4.400 util</td><td class="num">R$ 0,28 · R$ 0,14</td><td><span class="pill wn">Saldo baixo</span></td><td><div class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn o sm" data-modal="recarga">Recarregar</button><button class="btn p sm" data-client="Clínica Bem Viver|Pré-pago · por entregues|120 marketing · 4.400 utilidade">Acessar painel</button></div></td></tr>
+            <tr><td><b>Academia Ritmo</b><div class="sm muted">academia · 980 clientes</div></td><td>Pós-pago · disparadas</td><td class="num">—</td><td class="num">R$ 0,30 · R$ 0,15</td><td><span class="pill ok">Em dia</span></td><td><div class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn o sm">Ver fatura</button><button class="btn p sm" data-client="Academia Ritmo|Pós-pago · por disparadas|Sem fatura em aberto">Acessar painel</button></div></td></tr>
+            <tr><td><b>Ótica Vista</b><div class="sm muted">ótica · 410 clientes</div></td><td>Pré-pago · entregues</td><td class="num">0 mkt · 300 util</td><td class="num">R$ 0,30 · R$ 0,15</td><td><span class="pill dg">Bloqueado · fatura vencida</span></td><td><div class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn o sm">Liberar</button><button class="btn p sm" data-client="Ótica Vista|Pré-pago · por entregues|0 marketing · 300 utilidade">Acessar painel</button></div></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="grid g21">
+        <div class="card"><div class="in stack" style="gap:8px">
+          <h3>Suas faturas com a Ápice</h3>
+          <div class="sm muted" style="margin-top:-6px">A Ápice cobra você por mensagem entregue, no atacado. Quem cobra o cliente é você.</div>
+          <div class="row sp sm" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px"><span>Recarga · Aurora Modas · 1.000 mkt</span><span class="row"><b class="num">R$ 170,00</b><span class="pill wn">Pix vence hoje</span></span></div>
+          <div class="row sp sm" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px"><span>Disparo · Barbearia do Zé · 26/09</span><span class="row"><b class="num">R$ 88,40</b><span class="pill ok">Paga</span></span></div>
+          <div class="row sp sm" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px"><span>Recarga · Pet Amigo · 2.500 mkt</span><span class="row"><b class="num">R$ 425,00</b><span class="pill ok">Paga</span></span></div>
+        </div></div>
+        <div class="card"><div class="in stack" style="gap:8px">
+          <h3>Como funciona o dinheiro</h3>
+          <ol class="sm muted" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Você define o preço de cada cliente (ex.: R$ 0,30 por marketing).</li><li>O cliente paga você por fora.</li><li>Você paga a Ápice no atacado (R$ 0,17) pelo Pix, e o saldo entra na conta do cliente.</li><li>Mensagem não entregue volta como crédito ou desconto no próximo Pix.</li></ol>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AGÊNCIA · MARCA -->
+  <section class="screen" id="s-agencia-marca">
+    <div class="crumb"><button type="button" data-go="agencia">← Console da agência</button></div>
+    <div class="head"><div><h1>Marca da agência</h1><p>Seus clientes veem só a sua marca: painel, título da aba, login, convites e e-mails.</p></div></div>
+    <div class="grid g21">
+      <div class="card"><div class="in stack" style="gap:12px">
+        <div class="grid g2">
+          <label class="field">Nome de exibição<input id="b-nome" value="Agência Aurora"></label>
+          <label class="field">Cor principal<div class="row"><span style="width:36px;height:36px;border-radius:9px;background:#e11d48;border:1px solid var(--line)"></span><input id="b-cor" value="#e11d48" style="flex:1"></div></label>
+        </div>
+        <label class="field">URL HTTPS da logo<input id="b-logo" value="https://cdn.agenciaaurora.com.br/logo.png"></label>
+        <div class="grid g2">
+          <label class="field">Endereço de login<div class="row"><span class="muted sm">/entrar/</span><input id="b-slug" value="aurora" style="flex:1"></div></label>
+          <label class="field">Link de suporte<input id="b-sup" value="https://wa.me/5511999999999"></label>
+        </div>
+        <div class="row sp sm" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft)"><span class="muted">Link para seus clientes entrarem:</span><code>apice.app/entrar/aurora</code><button class="btn g sm">Copiar</button></div>
+        <button class="btn p" style="align-self:flex-start">Salvar marca</button>
+      </div></div>
+      <div class="card"><div class="in stack" style="gap:12px">
+        <div class="sm muted" style="text-transform:uppercase;letter-spacing:.08em;font-weight:600">Prévia no painel do cliente</div>
+        <div style="background:#171b22;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px">
+          <div class="row" style="color:#fff;font-family:'Plus Jakarta Sans';font-weight:800"><span style="width:28px;height:28px;border-radius:8px;background:#fff;color:#e11d48;display:grid;place-items:center;font-size:14px">A</span> Agência Aurora</div>
+          <div style="background:#e11d48;color:#fff;border-radius:9px;padding:8px 12px;font-weight:600;font-size:13px">Relatórios</div>
+          <div style="color:#b9c1cc;padding:6px 12px;font-size:13px">Novidades</div>
+          <div style="color:#b9c1cc;padding:6px 12px;font-size:13px">Biblioteca</div>
+        </div>
+        <button style="background:#e11d48;color:#fff;border:0;border-radius:9px;padding:8px 14px;font-weight:600;align-self:flex-start">Botão principal</button>
+        <div class="sm muted">O tom é ajustado automaticamente quando a cor escolhida não tem contraste suficiente.</div>
+      </div></div>
+    </div>
+  </section>
 
   <!-- PAINEL -->
   <section class="screen" id="s-painel">
@@ -577,7 +663,7 @@
 </section>
 
 <script>
-  const SCREENS = ['painel','novidades','biblioteca','whatsapp','fluxos','modelos','clientes','campanhas','campanha','cupons','pedidos','configuracoes','login'];
+  const SCREENS = ['agencia','agencia-marca','painel','novidades','biblioteca','whatsapp','fluxos','modelos','clientes','campanhas','campanha','cupons','pedidos','configuracoes','login'];
   const app = document.getElementById('app');
   const toastEl = document.getElementById('toast');
   let toastTimer;
@@ -592,7 +678,7 @@
     document.getElementById('s-login').classList.toggle('on', login);
     if (!login) {
       app.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + id));
-      const navId = id === 'campanha' ? 'campanhas' : id;
+      const navId = id === 'campanha' ? 'campanhas' : id === 'agencia-marca' ? 'agencia' : id;
       app.querySelectorAll('.nav').forEach(b => {
         if (b.dataset.go === navId) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
       });
@@ -600,7 +686,39 @@
     window.scrollTo({ top: 0 });
     try { history.replaceState(null, '', '#' + id); } catch (e) {}
   };
+  const MODALS = {
+    'novo-cliente': `<h3>Cadastrar cliente</h3><div class="sm muted" style="margin-top:-6px">O dono recebe um convite por e-mail com a sua marca. O link também fica disponível para copiar.</div>
+      <label class="field">Nome do negócio<input id="m-nome" value="Studio Bella Pele"></label>
+      <div class="grid g2"><label class="field">CNPJ ou CPF<input id="m-doc" value="12.345.678/0001-90"></label><label class="field">Tipo de negócio<input id="m-nicho" value="Clínica de estética"></label></div>
+      <div class="grid g2"><label class="field">Nome do dono<input id="m-dono" value="Bella Ferreira"></label><label class="field">E-mail do dono<input id="m-email" value="bella@studiobella.com.br"></label></div>
+      <div class="row"><span class="chip on">Pré-pago</span><span class="chip">Pós-pago</span><span class="chip on">Por entregues</span><span class="chip">Por disparadas</span></div>
+      <div class="grid g2"><label class="field">Preço marketing<input id="m-p1" value="R$ 0,30"></label><label class="field">Preço utilidade<input id="m-p2" value="R$ 0,15"></label></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn g" data-close>Cancelar</button><button class="btn p" data-close data-toast="Cliente cadastrado e convite enviado (prévia).">Cadastrar e convidar</button></div>`,
+    'recarga': `<h3>Recarregar saldo do cliente</h3><div class="sm muted" style="margin-top:-6px">Você paga a Ápice no atacado; o saldo entra na conta do cliente assim que o Pix for confirmado.</div>
+      <div class="row"><span class="chip on">Marketing</span><span class="chip">Utilidade</span><span class="chip">SMS</span><span class="chip">E-mail</span></div>
+      <div class="row"><span class="chip">500</span><span class="chip on">1.000</span><span class="chip">2.500</span><span class="chip">5.000</span></div>
+      <div class="row sp" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px"><span class="muted">1.000 mensagens × R$ 0,17 (atacado)</span><b class="num">R$ 170,00</b></div>
+      <div class="row sp sm" style="color:var(--success)"><span>Desconto das não entregues do último Pix</span><b class="num">− R$ 4,08</b></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn g" data-close>Cancelar</button><button class="btn p" data-close data-toast="Pix de R$ 165,92 gerado (prévia).">Gerar Pix de R$ 165,92</button></div>`,
+  };
+  const modal = document.getElementById('modal');
+  const openModal = (k) => { document.getElementById('modal-body').innerHTML = MODALS[k]; modal.hidden = false; };
+  const closeModal = () => { modal.hidden = true; };
   document.addEventListener('click', (e) => {
+    const cl = e.target.closest('[data-close]');
+    if (cl) { closeModal(); if (cl.dataset.toast) toast(cl.dataset.toast); return; }
+    if (e.target === modal) { closeModal(); return; }
+    const md = e.target.closest('[data-modal]');
+    if (md) { openModal(md.dataset.modal); return; }
+    const cli = e.target.closest('[data-client]');
+    if (cli) {
+      const [name, pkg, bal] = cli.dataset.client.split('|');
+      document.getElementById('acct-name').textContent = name;
+      document.getElementById('acct-pkg').textContent = pkg;
+      document.getElementById('acct-bal').textContent = bal;
+      show('painel'); toast('Você está no painel de ' + name + '. Volte pelo Console da agência.');
+      return;
+    }
     const go = e.target.closest('[data-go]');
     if (go) { show(go.dataset.go); return; }
     const react = e.target.closest('[data-react]');
@@ -618,7 +736,7 @@
       toast('Na prévia, só a aba Saldo tem conteúdo.');
       return;
     }
-    if (e.target.closest('.btn') && !e.target.closest('form')) toast('Na prévia este botão não faz nada. No sistema real, sim.');
+    if (e.target.closest('.btn') && !e.target.closest('form') && !e.target.closest('.modal')) toast('Na prévia este botão não faz nada. No sistema real, sim.');
   });
   document.getElementById('login-form').addEventListener('submit', (e) => { e.preventDefault(); show('painel'); toast('Na prévia, o login entra direto no painel.'); });
   show(location.hash.replace('#', '') || 'painel');
