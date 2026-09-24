@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ápice — prévia</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+<style>
+  :root {
+    --brand: #3fe0e8;
+    --ink: #171b22;
+    --primary: #0b7f87;
+    --primary-fg: #ffffff;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --fg: #171b22;
+    --muted: #5f6875;
+    --line: #e2e6ec;
+    --soft: #eef1f5;
+    --accent: #e3fafb;
+    --accent-fg: #0a6b72;
+    --success: #15803d;
+    --danger: #dc2626;
+    --sb: #171b22;
+    --sb-fg: #b9c1cc;
+    --sb-hover: #232935;
+    --sb-line: #262d38;
+    --bubble: #ecfdf5;
+    --bubble-line: #a7f3d0;
+    --shadow: 0 1px 2px rgba(23,27,34,.06), 0 8px 24px -12px rgba(23,27,34,.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --primary: #3fe0e8; --primary-fg: #171b22; --bg: #0f1216; --card: #171b22; --fg: #e6e9ee;
+      --muted: #98a2b1; --line: rgba(255,255,255,.08); --soft: #1e242d; --accent: #163b3f; --accent-fg: #a9f1f5;
+      --success: #4ade80; --danger: #f87171; --sb: #121519; --sb-hover: #1e242d; --sb-line: rgba(255,255,255,.08);
+      --bubble: #0f2a22; --bubble-line: #1f5a44; --shadow: 0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --primary: #3fe0e8; --primary-fg: #171b22; --bg: #0f1216; --card: #171b22; --fg: #e6e9ee;
+    --muted: #98a2b1; --line: rgba(255,255,255,.08); --soft: #1e242d; --accent: #163b3f; --accent-fg: #a9f1f5;
+    --success: #4ade80; --danger: #f87171; --sb: #121519; --sb-hover: #1e242d; --sb-line: rgba(255,255,255,.08);
+    --bubble: #0f2a22; --bubble-line: #1f5a44; --shadow: 0 1px 2px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: Inter, system-ui, sans-serif; font-size: 14px; line-height: 1.5; }
+  h1, h2, h3 { font-family: "Plus Jakarta Sans", Inter, sans-serif; margin: 0; text-wrap: balance; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* Barra da prévia */
+  .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink); color: #fff; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+  .top .who { display: flex; align-items: center; gap: 8px; font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800; font-size: 15px; }
+  .top .who small { font-family: Inter; font-weight: 500; color: #b9c1cc; }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+  .tabs button { background: transparent; border: 1px solid transparent; color: #b9c1cc; padding: 6px 12px; border-radius: 999px; font: inherit; font-weight: 500; cursor: pointer; }
+  .tabs button:hover { background: #232935; color: #fff; }
+  .tabs button[aria-pressed="true"] { background: var(--brand); color: var(--ink); font-weight: 600; }
+  .tabs button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .note { padding: 8px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--line); background: var(--card); }
+
+  /* Moldura do app */
+  .app { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: calc(100vh - 90px); }
+  .sidebar { background: var(--sb); color: var(--sb-fg); padding: 20px 14px; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid var(--sb-line); }
+  .logo { display: flex; align-items: center; gap: 10px; color: #fff; font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800; font-size: 18px; padding: 0 8px 14px; }
+  .logo svg { width: 34px; height: 34px; }
+  .acct { background: #1e242d; border-radius: 12px; padding: 10px 12px; margin: 0 4px 10px; }
+  .acct b { color: #fff; display: block; font-weight: 600; }
+  .acct span { font-size: 12px; }
+  .acct .bal { color: var(--brand); font-weight: 600; font-size: 12px; }
+  .grp { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #6f7886; padding: 10px 12px 4px; font-weight: 600; }
+  .nav { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; font-weight: 500; }
+  .nav svg { width: 16px; height: 16px; flex: none; }
+  .nav.on { background: var(--brand); color: var(--ink); font-weight: 600; box-shadow: 0 6px 16px -8px rgba(63,224,232,.6); }
+  .nav:not(.on):hover { background: var(--sb-hover); color: #fff; }
+  .main { padding: 22px 24px 40px; min-width: 0; }
+  .crumb { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+  .head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .head h1 { font-size: 22px; font-weight: 800; }
+  .head p { margin: 4px 0 0; color: var(--muted); max-width: 60ch; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 9px; font: inherit; font-weight: 600; border: 1px solid transparent; cursor: pointer; }
+  .btn.p { background: var(--primary); color: var(--primary-fg); }
+  .btn.o { background: var(--card); color: var(--fg); border-color: var(--line); }
+  .btn.g { background: transparent; color: var(--fg); }
+  .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .btn.sm { padding: 6px 10px; font-size: 13px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+  .card .in { padding: 16px 18px; }
+  .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  .grid { display: grid; gap: 14px; }
+  .g4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .g3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .g2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .g21 { grid-template-columns: minmax(0,2fr) minmax(0,1fr); }
+  .kpi .lbl { color: var(--muted); font-size: 13px; }
+  .kpi .val { font-family: "Plus Jakarta Sans", sans-serif; font-size: 24px; font-weight: 800; margin-top: 2px; }
+  .kpi .var { font-size: 12px; color: var(--success); font-weight: 600; }
+  .kpi .var.dn { color: var(--danger); }
+  .kpi .hint { font-size: 12px; color: var(--muted); }
+  .pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 9px; font-size: 12px; font-weight: 600; }
+  .pill.b { background: var(--accent); color: var(--accent-fg); }
+  .pill.s { background: var(--soft); color: var(--fg); }
+  .pill.ok { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
+  .pill.dk { background: var(--primary); color: var(--primary-fg); }
+  .stack { display: flex; flex-direction: column; gap: 14px; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sp { justify-content: space-between; }
+  .muted { color: var(--muted); }
+  .sm { font-size: 12px; }
+  .bar { height: 10px; border-radius: 999px; background: var(--soft); overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 999px; background: var(--primary); }
+  .bar i.c { background: var(--brand); }
+  .bubble { background: var(--bubble); border: 1px solid var(--bubble-line); border-radius: 14px 14px 14px 4px; padding: 10px 12px; font-size: 13px; line-height: 1.5; }
+  .var-tag { background: var(--accent); color: var(--accent-fg); border-radius: 4px; padding: 0 4px; font-weight: 600; }
+  .hero { background: var(--primary); color: var(--primary-fg); }
+  .hero .lbl { opacity: .85; }
+  .hero .val { font-family: "Plus Jakarta Sans", sans-serif; font-size: 34px; font-weight: 800; line-height: 1.1; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tbl th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  .tbl td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .chart { width: 100%; height: auto; display: block; }
+  .react { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 13px; }
+  .react.on { border-color: var(--primary); background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 13px; background: var(--card); }
+  .chip.on { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+
+  /* Login */
+  .login { display: grid; grid-template-columns: 45% 1fr; min-height: calc(100vh - 90px); }
+  .login .panel { background: var(--ink); color: #fff; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+  .login .panel::before { content: ""; position: absolute; inset: 0; background: radial-gradient(50rem 50rem at -10% -20%, rgba(63,224,232,.28), transparent 55%), radial-gradient(40rem 40rem at 120% 120%, rgba(63,224,232,.12), transparent 60%); }
+  .login .panel > * { position: relative; }
+  .login .panel h2 { font-size: 30px; font-weight: 800; line-height: 1.15; max-width: 18ch; }
+  .login .panel p { color: rgba(255,255,255,.7); max-width: 44ch; }
+  .login .form { display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+  .login form { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; }
+  .login label { font-size: 13px; font-weight: 500; display: flex; flex-direction: column; gap: 4px; }
+  .login input { font: inherit; padding: 9px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--card); color: var(--fg); }
+  .login input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+  .screen { display: none; }
+  .screen.on { display: block; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { flex-direction: row; flex-wrap: wrap; align-items: center; padding: 12px; }
+    .sidebar .acct, .sidebar .grp { display: none; }
+    .logo { padding: 0 8px 0 0; }
+    .g4, .g3, .g2, .g21 { grid-template-columns: 1fr 1fr; }
+    .login { grid-template-columns: 1fr; }
+    .login .panel { padding: 24px; }
+    .main { padding: 16px; }
+  }
+  @media (max-width: 520px) { .g4, .g3, .g2, .g21 { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: no-preference) { .btn, .nav, .tabs button { transition: background .15s, color .15s; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <mask id="m-ink" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="#fff"/><path d="M348 734 L420 632 C474 555 551 507 643 458 L631 513 C557 558 501 612 459 677 L422 734 Z" fill="#000"/></mask>
+    <symbol id="mark-white" viewBox="0 0 1024 1024"><g mask="url(#m-ink)"><path fill="#ffffff" d="M110 736 L258 576 Q273 560 288 576 L338 628 L493 334 Q506 309 522 334 L677 625 Q689 647 711 627 L767 570 Q781 555 795 571 L934 716 Q947 731 925 733 C744 719 648 739 528 732 C387 733 278 726 110 736 Z"/><path fill="#3FE0E8" d="M462 500 L512 394 Q518 381 526 398 L542 430 L495 493 Z"/></g></symbol>
+    <symbol id="mark-ink" viewBox="0 0 1024 1024"><g mask="url(#m-ink)"><path fill="#171B22" d="M110 736 L258 576 Q273 560 288 576 L338 628 L493 334 Q506 309 522 334 L677 625 Q689 647 711 627 L767 570 Q781 555 795 571 L934 716 Q947 731 925 733 C744 719 648 739 528 732 C387 733 278 726 110 736 Z"/><path fill="#3FE0E8" d="M462 500 L512 394 Q518 381 526 398 L542 430 L495 493 Z"/></g></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-news" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 4h13a3 3 0 0 1 3 3v12a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2zM8 8h5M8 12h9M8 16h9"/></symbol>
+    <symbol id="i-lib" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 4h4v16H4zM10 4h4v16h-4zM16 6l4-1 3 15-4 1z"/></symbol>
+    <symbol id="i-wa" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M21 12a9 9 0 0 1-13 8l-5 1 1-5a9 9 0 1 1 17-4z"/></symbol>
+    <symbol id="i-flow" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M5 4h4v4H5zM15 16h4v4h-4zM9 6h5a3 3 0 0 1 3 3v7"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 5h16v11H8l-4 4z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+    <symbol id="i-mega" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M3 11v2a2 2 0 0 0 2 2h2l6 4V5L7 9H5a2 2 0 0 0-2 2zM17 9a4 4 0 0 1 0 6"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M3 8h18v4H3zM5 12v9h14v-9M12 8v13M12 8s-3-6-5-4 5 4 5 4zm0 0s3-6 5-4-5 4-5 4z"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M6 7h12l1 14H5zM9 7a3 3 0 0 1 6 0"/></symbol>
+    <symbol id="i-set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 12v7h16v-7M12 3v12M8 7l4-4 4 4"/></symbol>
+  </defs>
+</svg>
+
+<div class="top">
+  <div class="who"><svg width="26" height="26"><use href="#mark-white"/></svg> Ápice <small>· prévia da identidade nova</small></div>
+  <div class="tabs" role="tablist" aria-label="Telas">
+    <button data-s="painel" aria-pressed="true">Painel</button>
+    <button data-s="biblioteca" aria-pressed="false">Biblioteca</button>
+    <button data-s="campanha" aria-pressed="false">Relatório da campanha</button>
+    <button data-s="novidades" aria-pressed="false">Novidades</button>
+    <button data-s="login" aria-pressed="false">Login</button>
+  </div>
+</div>
+<div class="note">Prévia estática das telas com a identidade grafite + ciano. Os números são de exemplo. O sistema real roda com login, banco e WhatsApp conectado.</div>
+
+<!-- ===== PAINEL ===== -->
+<section class="screen on" id="s-painel">
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><svg><use href="#mark-white"/></svg> Ápice</div>
+    <div class="acct"><b>Aurora Modas</b><span>Pré-pago · por entregues</span><br><span class="bal">1.240 marketing · 3.980 utilidade</span></div>
+    <div class="grp">Resumo</div>
+    <div class="nav on"><svg><use href="#i-chart"/></svg> Relatórios</div>
+    <div class="nav"><svg><use href="#i-news"/></svg> Novidades</div>
+    <div class="grp">Comunicação</div>
+    <div class="nav"><svg><use href="#i-lib"/></svg> Biblioteca</div>
+    <div class="nav"><svg><use href="#i-wa"/></svg> WhatsApp</div>
+    <div class="nav"><svg><use href="#i-flow"/></svg> Fluxos de Automação</div>
+    <div class="nav"><svg><use href="#i-msg"/></svg> Modelos de mensagem</div>
+    <div class="nav"><svg><use href="#i-users"/></svg> Área de clientes</div>
+    <div class="nav"><svg><use href="#i-mega"/></svg> Campanhas</div>
+    <div class="grp">Fidelização</div>
+    <div class="nav"><svg><use href="#i-gift"/></svg> Cupons e giftback</div>
+    <div class="grp">Vendas</div>
+    <div class="nav"><svg><use href="#i-bag"/></svg> Pedidos</div>
+    <div class="nav" style="margin-top:auto"><svg><use href="#i-set"/></svg> Configurações</div>
+  </aside>
+  <main class="main">
+    <div class="head">
+      <div><h1>Relatórios · Visão Geral</h1><p>Últimos 30 dias, comparado ao período anterior.</p></div>
+      <div class="chips"><span class="chip">7 dias</span><span class="chip on">30 dias</span><span class="chip">90 dias</span><span class="chip">12 meses</span></div>
+    </div>
+    <div class="stack">
+      <div class="card"><div class="in row sp">
+        <div class="row"><svg width="18" height="18" style="color:var(--primary)"><use href="#i-cal"/></svg><b>Datas chegando</b></div>
+        <span class="sm" style="color:var(--primary);font-weight:600">Ver calendário</span>
+      </div>
+      <div class="in" style="padding-top:0">
+        <div class="row sp" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px">
+          <div><b>Dia das Crianças</b> <span class="pill dk">Em 18 dias (12 de outubro)</span><div class="sm muted">A divulgação começa em 4 dias. Crie o modelo antes para chegar aprovado.</div></div>
+          <button class="btn p sm">Criar modelo</button>
+        </div>
+      </div></div>
+
+      <div class="grid g4">
+        <div class="card kpi"><div class="in"><div class="lbl">Receita total</div><div class="val num">R$ 184.320</div><div class="var">▲ 12,4% vs. anterior</div></div></div>
+        <div class="card kpi"><div class="in"><div class="lbl">Receita influenciada</div><div class="val num">R$ 41.760</div><div class="var">▲ 31,0%</div><div class="hint">Pela plataforma</div></div></div>
+        <div class="card kpi"><div class="in"><div class="lbl">Vendas</div><div class="val num">1.208</div><div class="var">▲ 8,1%</div></div></div>
+        <div class="card kpi"><div class="in"><div class="lbl">Retenção</div><div class="val num">46,2%</div><div class="var dn">▼ 1,3 p.p.</div><div class="hint">Vendas de clientes recorrentes</div></div></div>
+      </div>
+
+      <div class="grid g21">
+        <div class="card"><div class="in">
+          <h3>Receita por mês</h3>
+          <svg class="chart" viewBox="0 0 640 220" role="img" aria-label="Receita por mês, últimos 6 meses">
+            <defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3fe0e8" stop-opacity=".45"/><stop offset="1" stop-color="#3fe0e8" stop-opacity="0"/></linearGradient></defs>
+            <g stroke="var(--line)" stroke-width="1"><line x1="40" x2="620" y1="40" y2="40"/><line x1="40" x2="620" y1="90" y2="90"/><line x1="40" x2="620" y1="140" y2="140"/><line x1="40" x2="620" y1="190" y2="190"/></g>
+            <g fill="var(--muted)" font-size="11" font-family="Inter"><text x="8" y="44">200k</text><text x="8" y="94">150k</text><text x="8" y="144">100k</text><text x="14" y="194">50k</text></g>
+            <path d="M60 150 L172 132 L284 140 L396 104 L508 96 L620 60 L620 190 L60 190Z" fill="url(#ga)"/>
+            <path d="M60 150 L172 132 L284 140 L396 104 L508 96 L620 60" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linejoin="round"/>
+            <g fill="var(--primary)"><circle cx="60" cy="150" r="4"/><circle cx="172" cy="132" r="4"/><circle cx="284" cy="140" r="4"/><circle cx="396" cy="104" r="4"/><circle cx="508" cy="96" r="4"/><circle cx="620" cy="60" r="5" stroke="var(--card)" stroke-width="2"/></g>
+            <g fill="var(--muted)" font-size="11" font-family="Inter" text-anchor="middle"><text x="60" y="212">abr</text><text x="172" y="212">mai</text><text x="284" y="212">jun</text><text x="396" y="212">jul</text><text x="508" y="212">ago</text><text x="620" y="212">set</text></g>
+          </svg>
+        </div></div>
+        <div class="card"><div class="in stack" style="gap:10px">
+          <h3>Receita por canal</h3>
+          <div><div class="row sp sm"><span>Campanhas WhatsApp</span><b class="num">R$ 24.900</b></div><div class="bar"><i style="width:60%"></i></div></div>
+          <div><div class="row sp sm"><span>Fluxos de automação</span><b class="num">R$ 11.380</b></div><div class="bar"><i class="c" style="width:27%"></i></div></div>
+          <div><div class="row sp sm"><span>Cupons e giftback</span><b class="num">R$ 5.480</b></div><div class="bar"><i style="width:13%;background:#6366f1"></i></div></div>
+          <div class="sm muted" style="margin-top:4px">Atribuição em até 7 dias após o contato.</div>
+        </div></div>
+      </div>
+    </div>
+  </main>
+</div>
+</section>
+
+<!-- ===== BIBLIOTECA ===== -->
+<section class="screen" id="s-biblioteca">
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><svg><use href="#mark-white"/></svg> Ápice</div>
+    <div class="acct"><b>Pet Amigo</b><span>Pré-pago · por entregues</span><br><span class="bal">860 marketing · 2.100 utilidade</span></div>
+    <div class="grp">Resumo</div>
+    <div class="nav"><svg><use href="#i-chart"/></svg> Relatórios</div>
+    <div class="nav"><svg><use href="#i-news"/></svg> Novidades</div>
+    <div class="grp">Comunicação</div>
+    <div class="nav on"><svg><use href="#i-lib"/></svg> Biblioteca</div>
+    <div class="nav"><svg><use href="#i-wa"/></svg> WhatsApp</div>
+    <div class="nav"><svg><use href="#i-flow"/></svg> Fluxos de Automação</div>
+    <div class="nav"><svg><use href="#i-msg"/></svg> Modelos de mensagem</div>
+    <div class="nav"><svg><use href="#i-mega"/></svg> Campanhas</div>
+    <div class="nav" style="margin-top:auto"><svg><use href="#i-set"/></svg> Configurações</div>
+  </aside>
+  <main class="main">
+    <div class="head"><div><h1>Biblioteca</h1><p>Modelos, fluxos e datas pensados para pet shop. Use, personalize e dispare.</p></div></div>
+    <div class="stack">
+      <div class="chips"><span class="chip on">Modelos (7)</span><span class="chip">Fluxos (4)</span><span class="chip">Calendário (8)</span></div>
+      <div class="grid g2">
+        <div class="card"><div class="in stack" style="gap:10px">
+          <div class="row sp"><b>Lembrete de banho</b><span class="pill s">Utilidade</span></div>
+          <div class="sm muted">Avisa que já passou o tempo do último banho.</div>
+          <div class="bubble">Oi, <span class="var-tag">primeiro nome</span>! Já faz um tempinho desde o último banho do seu pet na <span class="var-tag">loja</span>. Quer agendar? 🐾</div>
+          <div class="row" style="justify-content:flex-end"><button class="btn p sm">Usar</button></div>
+        </div></div>
+        <div class="card"><div class="in stack" style="gap:10px">
+          <div class="row sp"><b>Dia dos Animais</b><span class="pill s">Marketing</span></div>
+          <div class="sm muted">4 de outubro. Comece a divulgar uma semana antes.</div>
+          <div class="bubble">Oi, <span class="var-tag">primeiro nome</span>! Dia 4 é Dia dos Animais e a <span class="var-tag">loja</span> preparou <span class="var-tag">desconto</span> de desconto em rações e petiscos. Vale até <span class="var-tag">validade</span>.</div>
+          <div class="row" style="justify-content:flex-end"><button class="btn o sm">✓ Já está na sua conta</button></div>
+        </div></div>
+        <div class="card"><div class="in stack" style="gap:10px">
+          <div class="row sp"><b>Sentimos sua falta</b><span class="pill s">Marketing</span></div>
+          <div class="sm muted">Reativação de quem não volta há 60 dias.</div>
+          <div class="bubble">Oi, <span class="var-tag">primeiro nome</span>, sentimos sua falta na <span class="var-tag">loja</span>! Separamos o cupom <span class="var-tag">cupom</span> para a sua próxima compra.</div>
+          <div class="row" style="justify-content:flex-end"><button class="btn p sm">Usar</button></div>
+        </div></div>
+        <div class="card"><div class="in stack" style="gap:10px">
+          <div class="row sp"><b>Banho a cada 15 dias</b><span class="pill b">Fluxo · Compra</span></div>
+          <div class="sm muted">Depois de um banho, lembra o cliente na hora certa.</div>
+          <ol class="sm muted" style="margin:0;padding-left:18px"><li>Espera 13 dias</li><li>Envia a mensagem do fluxo</li><li>Espera 2 dias</li><li>Gera cupom de 10% (vale 7 dias)</li></ol>
+          <div class="row" style="justify-content:flex-end"><button class="btn p sm">Usar</button></div>
+        </div></div>
+      </div>
+    </div>
+  </main>
+</div>
+</section>
+
+<!-- ===== CAMPANHA ===== -->
+<section class="screen" id="s-campanha">
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><svg><use href="#mark-white"/></svg> Ápice</div>
+    <div class="acct"><b>Aurora Modas</b><span>Pré-pago · por entregues</span><br><span class="bal">1.240 marketing · 3.980 utilidade</span></div>
+    <div class="grp">Resumo</div>
+    <div class="nav"><svg><use href="#i-chart"/></svg> Relatórios</div>
+    <div class="nav"><svg><use href="#i-news"/></svg> Novidades</div>
+    <div class="grp">Comunicação</div>
+    <div class="nav"><svg><use href="#i-lib"/></svg> Biblioteca</div>
+    <div class="nav"><svg><use href="#i-wa"/></svg> WhatsApp</div>
+    <div class="nav"><svg><use href="#i-flow"/></svg> Fluxos de Automação</div>
+    <div class="nav"><svg><use href="#i-msg"/></svg> Modelos de mensagem</div>
+    <div class="nav on"><svg><use href="#i-mega"/></svg> Campanhas</div>
+    <div class="nav" style="margin-top:auto"><svg><use href="#i-set"/></svg> Configurações</div>
+  </aside>
+  <main class="main">
+    <div class="crumb">← Campanhas</div>
+    <div class="head">
+      <div><h1>Dia das Mães — Giftback em dobro <span class="pill ok">Concluída</span></h1><p>Campeãs e fiéis · 660 destinatários · 30 msg/min · Concluída em 26/07/2026 às 15:13</p></div>
+      <div class="row"><button class="btn p sm"><svg width="14" height="14"><use href="#i-share"/></svg> Enviar imagem</button><button class="btn o sm">Baixar imagem</button><button class="btn o sm">Baixar PDF</button><button class="btn g sm">Duplicar</button></div>
+    </div>
+    <div class="stack">
+      <div class="grid g21" style="grid-template-columns:minmax(0,1.3fr) minmax(0,2fr)">
+        <div class="card hero"><div class="in stack" style="gap:8px">
+          <div class="row sp"><span class="lbl">Vendas geradas</span><svg width="18" height="18"><use href="#i-bag"/></svg></div>
+          <div class="val num">R$ 12.480,00</div>
+          <div class="sm" style="opacity:.9">37 pedido(s) de 31 cliente(s) em até 7 dias do envio · R$ 19,78 por mensagem entregue</div>
+        </div></div>
+        <div class="grid g4">
+          <div class="card kpi"><div class="in"><div class="lbl">Enviadas</div><div class="val num">655</div><div class="hint">99,2% do público</div></div></div>
+          <div class="card kpi"><div class="in"><div class="lbl">Entregues</div><div class="val num">631</div><div class="hint">96,3%</div></div></div>
+          <div class="card kpi"><div class="in"><div class="lbl">Lidas</div><div class="val num">402</div><div class="hint">63,7% das entregues</div></div></div>
+          <div class="card kpi"><div class="in"><div class="lbl">Respostas</div><div class="val num">88</div><div class="hint">13,9% das entregues</div></div></div>
+        </div>
+      </div>
+      <div class="grid g21">
+        <div class="card"><div class="in stack" style="gap:10px">
+          <h3>Funil da campanha <span class="muted" style="font-weight:400;font-size:13px">· % sobre as enviadas</span></h3>
+          <div><div class="row sp sm"><b>Enviadas</b><span class="muted num">655 · 100%</span></div><div class="bar"><i style="width:100%"></i></div></div>
+          <div><div class="row sp sm"><b>Entregues</b><span class="muted num">631 · 96,3%</span></div><div class="bar"><i style="width:96%;background:#0ea5e9"></i></div></div>
+          <div><div class="row sp sm"><b>Lidas</b><span class="muted num">402 · 61,4%</span></div><div class="bar"><i style="width:61%;background:#10b981"></i></div></div>
+          <div><div class="row sp sm"><b>Responderam</b><span class="muted num">88 · 13,4%</span></div><div class="bar"><i style="width:13%;background:#8b5cf6"></i></div></div>
+          <div><div class="row sp sm"><b>Compraram</b><span class="muted num">31 · 4,7%</span></div><div class="bar"><i style="width:5%;background:#f59e0b"></i></div></div>
+          <div style="border-top:1px solid var(--line);padding-top:12px">
+            <div class="sm" style="font-weight:600;margin-bottom:8px">Comparado à média das 5 campanhas anteriores</div>
+            <div class="grid g4" style="gap:8px">
+              <div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px"><div class="sm muted">Entrega</div><b class="num">96,3%</b><div class="sm" style="color:var(--success)">↗ 1,2 p.p. vs. 95,1%</div></div>
+              <div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px"><div class="sm muted">Leitura</div><b class="num">63,7%</b><div class="sm" style="color:var(--success)">↗ 6,4 p.p. vs. 57,3%</div></div>
+              <div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px"><div class="sm muted">Resposta</div><b class="num">13,9%</b><div class="sm" style="color:var(--danger)">↘ 0,8 p.p. vs. 14,7%</div></div>
+              <div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px"><div class="sm muted">Compra</div><b class="num">4,9%</b><div class="sm" style="color:var(--success)">↗ 1,5 p.p. vs. 3,4%</div></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="stack">
+          <div class="card"><div class="in"><h3>Falhas de envio</h3>
+            <div class="row sp sm" style="border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px"><span>Número sem WhatsApp</span><b>18</b></div>
+            <div class="row sp sm" style="border:1px solid var(--line);border-radius:8px;padding:6px 10px"><span>Cliente pediu para não receber</span><b>6</b></div>
+            <div class="sm muted" style="margin-top:8px">24 falha(s) no total. Mensagem que falha não é cobrada.</div>
+          </div></div>
+          <div class="card"><div class="in"><h3>Mensagem enviada</h3>
+            <div class="bubble"><span class="var-tag">primeiro nome</span>, sua compra gerou um presente! 🎁 Use o cupom <span class="var-tag">cupom</span> e ganhe <span class="var-tag">desconto</span> na próxima compra. Vale até <span class="var-tag">validade</span>.</div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</section>
+
+<!-- ===== NOVIDADES ===== -->
+<section class="screen" id="s-novidades">
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><svg><use href="#mark-white"/></svg> Ápice</div>
+    <div class="acct"><b>Aurora Modas</b><span>Pré-pago · por entregues</span><br><span class="bal">1.240 marketing · 3.980 utilidade</span></div>
+    <div class="grp">Resumo</div>
+    <div class="nav"><svg><use href="#i-chart"/></svg> Relatórios</div>
+    <div class="nav on"><svg><use href="#i-news"/></svg> Novidades</div>
+    <div class="grp">Comunicação</div>
+    <div class="nav"><svg><use href="#i-lib"/></svg> Biblioteca</div>
+    <div class="nav"><svg><use href="#i-wa"/></svg> WhatsApp</div>
+    <div class="nav"><svg><use href="#i-mega"/></svg> Campanhas</div>
+    <div class="nav" style="margin-top:auto"><svg><use href="#i-set"/></svg> Configurações</div>
+  </aside>
+  <main class="main">
+    <div class="head"><div><h1>Novidades</h1><p>Tendências e o que grandes empresas e concorrentes estão fazendo, no Brasil e no mundo — com o que importa para moda.</p></div></div>
+    <div class="stack" style="max-width:680px">
+      <div class="chips"><span class="chip on">Para você</span><span class="chip">Salvas</span></div>
+      <div class="card"><div class="in stack" style="gap:10px">
+        <div class="row sm muted"><span class="pill s">Brasil</span><span class="pill" style="border:1px solid var(--line)">Moda</span><span>22 de set · Mercado &amp; Consumo</span></div>
+        <h2 style="font-size:18px;font-weight:700">Lojas de moda vendem mais pelo WhatsApp do que pelo site</h2>
+        <p style="margin:0">Pesquisa com 400 varejistas mostra que o atendimento por mensagem já responde por um terço das vendas online das lojas pequenas e médias, com ticket maior que o do e-commerce tradicional.</p>
+        <div class="row" style="background:var(--accent);color:var(--accent-fg);border-radius:10px;padding:10px 12px;font-size:13px"><b>Como aproveitar:</b>&nbsp;mande a coleção nova primeiro para quem comprou nos últimos 90 dias, com um link direto para a peça.</div>
+        <div class="row sp"><div class="row"><span class="react on">👍 12</span><span class="react">💡 4</span><span class="react">🔥 7</span></div><div class="row sm"><span class="muted">Salvar</span><span style="color:var(--primary);font-weight:600">Ler matéria ↗</span></div></div>
+      </div></div>
+      <div class="card"><div class="in stack" style="gap:10px">
+        <div class="row sm muted"><span class="pill s">Mundo</span><span>21 de set · Retail Dive</span></div>
+        <h2 style="font-size:18px;font-weight:700">Grandes redes trocam o desconto genérico pelo cupom com prazo curto</h2>
+        <p style="margin:0">Varejistas americanas relatam mais conversão com cupons válidos por até 5 dias enviados logo após a compra, em vez de promoções abertas o mês inteiro.</p>
+        <div class="row" style="background:var(--accent);color:var(--accent-fg);border-radius:10px;padding:10px 12px;font-size:13px"><b>Como aproveitar:</b>&nbsp;configure o giftback com validade de 5 a 7 dias e avise pelo WhatsApp no dia da compra.</div>
+        <div class="row sp"><div class="row"><span class="react">👍 3</span><span class="react">💡 9</span><span class="react">🔥 2</span></div><div class="row sm"><span class="muted">Salvar</span><span style="color:var(--primary);font-weight:600">Ler matéria ↗</span></div></div>
+      </div></div>
+    </div>
+  </main>
+</div>
+</section>
+
+<!-- ===== LOGIN ===== -->
+<section class="screen" id="s-login">
+<div class="login">
+  <div class="panel">
+    <div class="logo" style="padding:0"><svg><use href="#mark-white"/></svg> Ápice</div>
+    <div><h2>Transforme clientes de uma compra só em clientes para sempre.</h2><p>Relatórios de retenção, campanhas de WhatsApp, giftback e automações — tudo em um só lugar, conectado à sua loja.</p></div>
+    <p style="font-size:12px;color:rgba(255,255,255,.5)">© 2026 Metalink · metalink.digital</p>
+  </div>
+  <div class="form">
+    <form onsubmit="event.preventDefault()">
+      <h2 style="font-size:22px;font-weight:800">Entrar</h2>
+      <p class="muted" style="margin:0 0 8px">Use o e-mail cadastrado pela sua empresa.</p>
+      <label>E-mail<input id="f-email" type="email" placeholder="voce@empresa.com.br"></label>
+      <label>Senha<input id="f-senha" type="password" placeholder="••••••••"></label>
+      <button class="btn p" type="submit" style="justify-content:center;margin-top:6px">Entrar</button>
+      <span class="sm" style="color:var(--primary);font-weight:600;text-align:center">Esqueci minha senha</span>
+    </form>
+  </div>
+</div>
+</section>
+
+<script>
+  const tabs = document.querySelectorAll('.tabs button');
+  const show = (id) => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + id));
+    tabs.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === id)));
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  };
+  tabs.forEach(b => b.addEventListener('click', () => show(b.dataset.s)));
+  const start = location.hash.replace('#', '');
+  if (['painel','biblioteca','campanha','novidades','login'].includes(start)) show(start);
+</script>
+
+</body>
+</html>
