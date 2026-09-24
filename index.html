@@ -448,16 +448,40 @@
 </div>
 </section>
 
+<style>
+  .nav, .chip, .btn, .react { cursor: pointer; }
+  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13px; box-shadow: 0 10px 30px -10px rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20; max-width: calc(100vw - 32px); text-align: center; }
+  .toast.on { opacity: 1; }
+</style>
+<div class="toast" id="toast" role="status"></div>
 <script>
+  const SCREENS = ['painel','biblioteca','campanha','novidades','login'];
+  const BY_LABEL = { 'Relatórios': 'painel', 'Novidades': 'novidades', 'Biblioteca': 'biblioteca', 'Campanhas': 'campanha' };
   const tabs = document.querySelectorAll('.tabs button');
+  const toastEl = document.getElementById('toast');
+  let toastTimer;
+  const toast = (msg) => {
+    toastEl.textContent = msg; toastEl.classList.add('on');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('on'), 2200);
+  };
   const show = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + id));
     tabs.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === id)));
+    window.scrollTo({ top: 0 });
     try { history.replaceState(null, '', '#' + id); } catch (e) {}
   };
   tabs.forEach(b => b.addEventListener('click', () => show(b.dataset.s)));
+  document.querySelectorAll('.nav').forEach(el => {
+    const target = BY_LABEL[el.textContent.trim()];
+    el.addEventListener('click', () => target ? show(target) : toast('Esta tela existe só no sistema completo. A prévia mostra 5 telas.'));
+  });
+  document.querySelectorAll('.btn, .chip, .react').forEach(el => {
+    if (el.type === 'submit') return;
+    el.addEventListener('click', () => toast('Na prévia os botões não fazem nada. No sistema real, sim.'));
+  });
+  document.querySelector('#s-login form').addEventListener('submit', (e) => { e.preventDefault(); show('painel'); toast('Na prévia, o login entra direto no painel.'); });
   const start = location.hash.replace('#', '');
-  if (['painel','biblioteca','campanha','novidades','login'].includes(start)) show(start);
+  if (SCREENS.includes(start)) show(start);
 </script>
 
 </body>
